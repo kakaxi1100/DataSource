@@ -26,3 +26,6 @@
 *.exe
 *.out
 *.app
+
+Tree/.settings/
+Tree/bin-debug/
