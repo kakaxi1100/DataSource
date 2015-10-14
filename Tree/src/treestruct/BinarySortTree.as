@@ -212,6 +212,47 @@ package treestruct
 			return null;
 		}
 		
+		/**
+		 *插入节点到 二叉查找树 
+		 * @param p
+		 * 
+		 */		
+		public function instert(p:BinarySortTreeNode):void
+		{
+			if(p == null) return;
+			var crt:BinarySortTreeNode = r;
+			var pre:BinarySortTreeNode;
+			//先循环找到叶子节点
+			while(crt != null)
+			{
+				pre = crt;
+				if(p.data > crt.data)
+				{
+					crt = crt.right;
+				}else
+				{
+					crt = crt.left;
+				}
+			}
+			
+			//此时 pre为要找的那个而叶子节点， crt为空
+			if(r == null)
+			{
+				r = p;
+			}else if(p.data > pre.data)//比较叶子节点的值，进行插入
+			{
+				pre.right = p;
+			}else
+			{
+				pre.left = p;
+			}
+		}
+		
+		/**
+		 *访问节点 
+		 * @param p
+		 * 
+		 */		
 		public function visit(p:BinarySortTreeNode):void
 		{
 			trace(p);
