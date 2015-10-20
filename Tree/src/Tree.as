@@ -45,12 +45,30 @@ package
 			
 			//trace(bt.search(10).data);
 			//bt.breadthFirst();
-//			bt.inorder(r);
-			bt.iterativeInorder();
+			bt.inorder(r);
+//			bt.iterativeInorder();
 //			bt.preorder(r);
 //			bt.iterativePreorder();
 //			bt.postorder(r);
 //			bt.iterativePostorder();
+//			trace("----------------------------");
+//			bt.findAndDeleteByMerging(25);
+//			trace("#####");
+//			bt.preorder(bt.r);
+//			trace("-------------------------------");
+//			bt.findAndDeleteByMerging(20);
+//			trace("########");
+//			bt.preorder(bt.r);
+//			trace("---------");
+//			trace("findAndDeleteByCopying(12)..");
+//			bt.findAndDeleteByCopying(12);
+//			trace("----------");
+//			bt.preorder(bt.r);
+//			trace("---------");
+//			trace("findAndDeleteByCopying(10)..");
+//			bt.findAndDeleteByCopying(10);
+//			trace("----------");
+//			bt.preorder(bt.r);
 		}
 	}
 }

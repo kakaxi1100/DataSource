@@ -214,6 +214,9 @@ package treestruct
 		
 		/**
 		 *插入节点到 二叉查找树 
+		 * 插入就是插入到叶子节点，
+		 * 找到最终的那个叶子节点，
+		 * 如果比此叶子节点的值大就插到右边， 否则插入到左边
 		 * @param p
 		 * 
 		 */		
@@ -246,6 +249,211 @@ package treestruct
 			{
 				pre.left = p;
 			}
+		}
+		
+		/**
+		 *合并删除
+		 * 合并删除会增加树的高度,删除节点会增加数的高度
+		 * 有三种情况：
+		 * 1，要删除的节点是一个叶子节点，直接删除此节点，并将父节点的指向它的指针置为空
+		 * 2，要删除的节点只有一个子节点，则删除此及诶单，并将它父节点的指向它的指针指向它的子节点
+		 * 3，要删除的节点有两个子节点，可以通过合并删除处理
+		 * 此节点删除后，分为左子树和右子树，找到此左子树的最大节点，并将其作为右子树的父节点
+		 * 或者同意，找到右子树最小的节点，作为左子树的父节点。 
+		 * @param s
+		 * 
+		 */		
+		public function findAndDeleteByMerging(s:int):void
+		{
+			var crt:BinarySortTreeNode = r;
+			var parent:BinarySortTreeNode;
+			//先找到要找的节点并和父节点
+			while(crt != null)
+			{
+				if(s == crt.data)
+				{
+					break;
+				}
+				parent = crt;
+				if(s > crt.data)
+				{
+					crt = crt.right;
+				}else if(s < crt.data)
+				{
+					crt = crt.left;
+				}
+			}
+			
+			//看此节点子节点的情况来决定如何删除
+			if(crt != null && crt.data == s)
+			{
+				deleteByMerging(crt, parent);
+			}
+		}
+		
+		/**
+		 *合并并删除节点 
+		 * @param pCrt
+		 * @param pParent
+		 * 
+		 */		
+		private function deleteByMerging(pCrt:BinarySortTreeNode, pParent:BinarySortTreeNode):void
+		{
+			//假如点为空，就直接返回
+			if(pCrt == null) return;
+			var rightMost:BinarySortTreeNode = findTheRightMost(pCrt.left);//找到左子树的最大节点
+			/*if(rightMost != null)//假如有左子节点一定可以找到
+			{
+				rightMost.right = pCrt.right;//找到后，让右子树做合并，不管是不是null 都可以
+			}*/
+				
+			if(pParent == null)//表明是root 重新指派root
+			{
+				if(rightMost != null)//假如当前节点有左子节点，则做过合并，root 直接指向左子节点
+				{
+					r = pCrt.left;
+				}else
+				{
+					r = pCrt.right;//假如没有左子节点，则指向其右子节点
+				}
+			}
+			else
+			{
+				if(pParent.right == pCrt)//假如当前节点是父节点的右节点，就将父节点的右指针，指向当且节点不为空的那个节点。
+				{
+					if(pCrt.left != null)//也可以用rightMost 代替
+					{
+						pParent.right = pCrt.left;
+					}else
+					{
+						pParent.right = pCrt.right;
+					}
+				}else//假如当前节点是父节点的左节点，就将父节点的左指针，指向当且节点不为空的那个节点。
+				{
+					if(pCrt.left != null)//也可用用rightMost 代替
+					{
+						pParent.left = pCrt.left;
+					}else
+					{
+						pParent.left = pCrt.right;
+					}
+				}
+			}
+			pCrt = null;//删除当前节点
+		}
+		
+		/**
+		 *复制删除 
+		 * 复制删除的优点是没有增加树的高度,但是如果删除的都是同一个节点，那么多次的插入和删除会使树向右倾斜
+		 * 有三种情况：
+		 * 1，要删除的节点是一个叶子节点，直接删除此节点，并将父节点的指向它的指针置为空
+		 * 2，要删除的节点只有一个子节点，则删除此及诶单，并将它父节点的指向它的指针指向它的子节点
+		 * 3，要删除的节点有两个子节点，可以通过复制删除处理
+		 * 先找到要删除的点左子树的最右边一点，在把值复制给当前点，假如最右边的一点有左子树，则它的父节点指向其左节点。
+		 * @param s
+		 * 
+		 */		
+		public function findAndDeleteByCopying(s:int):void
+		{
+			var crt:BinarySortTreeNode = r;
+			var parent:BinarySortTreeNode;
+			//先找到要找的节点并和父节点
+			while(crt != null)
+			{
+				if(s == crt.data)
+				{
+					break;
+				}
+				parent = crt;
+				if(s > crt.data)
+				{
+					crt = crt.right;
+				}else if(s < crt.data)
+				{
+					crt = crt.left;
+				}
+			}
+			
+			//看此节点子节点的情况来决定如何删除
+			if(crt != null && crt.data == s)
+			{
+				deleteByCopying(crt, parent);
+			}
+		}
+		
+		private function deleteByCopying(pCrt:BinarySortTreeNode,  pParent:BinarySortTreeNode):void
+		{
+			//假如点为空，就直接返回
+			if(pCrt == null) return;
+			var parent:BinarySortTreeNode = pCrt;//parent, 首先指向要删除的节点
+			var temp:BinarySortTreeNode = pCrt.left;//temp首先指向当前节点的左节点，不管是不是空
+			//查找左子树最大的节点，并且记录 parent 值
+			while(temp != null && temp.right != null)
+			{
+				parent = temp;//记录最后右节点的父节点
+				temp = temp.right;//左子树中最大的值
+			}
+			//此时有两种情况
+			//1, 当前节点有左子树,则 temp不为空
+			if(temp != null)
+			{
+				//1,把temp的赋值给当前节点
+				pCrt.data = temp.data;
+				//2，删除temp节点,temp节点除了初始的pCrt.left外只能是parent的右节点
+				if(temp == pCrt.left)
+				{
+					parent.left = null;
+				}
+				else
+				{
+					parent.right = null;
+				}
+				temp = null;
+			}
+			//2, 当前节点没有左子树，则temp为空
+			else
+			{
+				//则将其右节点赋值给它的parent，不管它的右节点是不是为空，然后删除此节点
+				//1,先判断它是自己parent的左节点还是右节点
+				if(pParent.left == pCrt)
+				{
+					pParent.left = pCrt.right;
+				}else
+				{
+					pParent.right = pCrt.right;
+				}
+				pCrt = null;
+			}
+		}
+		
+		/**
+		 *找到最小的点 
+		 * @return 
+		 * 
+		 */		
+		private function findTheLeftMost(p:BinarySortTreeNode):BinarySortTreeNode
+		{
+			var temp:BinarySortTreeNode = p;
+			while(temp != null && temp.left != null)
+			{
+				temp = temp.left;
+			}
+			return temp
+		}
+		
+		/**
+		 *找到最大的点 
+		 * @return 
+		 * 
+		 */		
+		private function findTheRightMost(p:BinarySortTreeNode):BinarySortTreeNode
+		{
+			var temp:BinarySortTreeNode = p;
+			while(temp != null && temp.right != null)
+			{
+				temp = temp.right;
+			}
+			return temp
 		}
 		
 		/**
