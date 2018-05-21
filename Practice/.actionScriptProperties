@@ -32,9 +32,9 @@
     <sourceAttachmentPath/>
   </compiler>
   <applications>
-    <application path="Complexity.as"/>
-    <application path="BinaryTree.as"/>
+    <application path="BinaryTreeTest.as"/>
     <application path="Practice.as"/>
+    <application path="Complexity.as"/>
   </applications>
   <modules/>
   <workers/>
