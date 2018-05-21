@@ -86,12 +86,12 @@ package
 			}
 			
 			//4.测试
-			var s:String = "def";
-			var e:uint = encodeS(s);
-//			decodeV(e);
+			var s:String = "defabcddd";
+			var b:ByteArray = encodeS(s);
+			decodeV(b);
 		}
 		
-		public function encodeS(s:String):uint
+		public function encodeS(s:String):ByteArray
 		{
 			var abc:uint = 0;
 			var key:String = "";
@@ -102,24 +102,21 @@ package
 				key = s.charAt(i);
 				value = this.charsDic[key];
 				bb.writeUnsignedInt(value);
-				trace(bb);
 			}
 			
-			return 0;
+			return bb;
 		}
 		
-		public function decodeV(value:uint):String
+		public function decodeV(value:ByteArray):String
 		{
-			var ft:uint = 0xffffffff;
+			value.position = 0;
 			var s:String = "";
-			trace(value.toString(2))
-			var key:uint = value & ft;
-			var char:String = this.charsDic[key];
-			trace(char);
-			value = value >> 32
-			
-			
-			
+			while(value.bytesAvailable > 0)
+			{
+				var charKey:uint = value.readUnsignedInt();	
+				s += this.charsDic[charKey];
+			}
+			trace(s);
 			return s;
 		}
 	}
