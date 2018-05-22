@@ -22,7 +22,7 @@ package
 	[SWF(width="800", height="600", frameRate="60", backgroundColor="0")]
 	public class BinaryTreeTest extends Sprite
 	{
-		public var chars:Array = ["a", "b", "c", "d", "e", "f", "g"];
+		public var chars:Array = ["a", "b", "c", "d", "e", "f", "g","h","i","j","k","l"];
 		public var charsDic:Dictionary = new Dictionary();
 		public var encode:uint = 0;
 		public function BinaryTreeTest()
@@ -43,9 +43,9 @@ package
 			while(trees.length > 1)
 			{
 				//取出两颗树进行合并
-				var first:BinaryTree = trees.pop();
+				var first:BinaryTree = trees.shift();
 				first.rootNode.data = 0;
-				var second:BinaryTree = trees.pop();
+				var second:BinaryTree = trees.shift();
 				second.rootNode.data = 1;
 				//创建一个新的trees
 				var newTree:BinaryTree = new BinaryTree();
@@ -86,7 +86,7 @@ package
 			}
 			
 			//4.测试
-			var s:String = "defabcddd";
+			var s:String = "deflkjlhlkjlkjljlkjljlkjabcddd";
 			var b:ByteArray = encodeS(s);
 			decodeV(b);
 		}
@@ -144,8 +144,8 @@ class BinaryTree extends Sprite
 			parentX = node.parentNode.x;
 			parentY = node.parentNode.y;
 		}
-		node.x = parentX + offsetX * 20;
-		node.y = parentY + offsetY * 20;
+		node.x = parentX + offsetX * 50;
+		node.y = parentY + offsetY * 50;
 		this.graphics.moveTo(parentX,  parentY + 5);
 		this.graphics.lineTo(node.x, node.y - 5);
 		this.draw(node.leftChild, -1, 1, 0xffff00);
