@@ -28,15 +28,87 @@ package
 		若将上述BFS策略应用于树结构，则效果等同于层次遍历
 	 * 
 	 * 	 
+	 * 
+	 * 图的邻接矩阵表示方式
+	 * 一个一维数组用来存储顶点信息, 一个二维数组存储边的信息
+	 * 
+	 * 图的邻接表表示方法
+	 * 一个一维数组用来存储顶点信息(或者用链表, 只不过数组更方便读取顶点信息)
+	 * 每个顶点还需要有个指向其第一个邻接点的指针
+	 * 
+	 * 
+	 * 
 	 * @author juli
 	 * 
 	 */	
 	[SWF(width="800", height="600", frameRate="60", backgroundColor="0")]
 	public class GraphicsTest extends Sprite
 	{
+		// v0  v1
+		// -------
+		// |\   /|
+		// | \ / |
+		// |  \  |
+		// | / \ |
+		// |/   \|
+		// -------
+		// v2    v3
+		//
+		
+		public var gm:GraphicsMatrix = new GraphicsMatrix(4);
 		public function GraphicsTest()
 		{
 			super();
+			for(var i:int = 0; i < 4; i++)
+			{
+				gm.vertex[i].data = i * 10;
+				for(var j:int = i + 1; j < 4; j++){
+					var e:Edge = gm.edges[i][j] = gm.edges[j][i];//无向图矩阵对称
+					e.weight = 1;
+				}
+			}
 		}
 	}
 }
+
+//-----------邻接矩阵表示法-------------------------------------------------------
+class GraphicsMatrix
+{
+	public var vertex:Vector.<Node> = new Vector.<Node>();
+	public var edges:Vector.<Vector.<Edge>> = new Vector.<Vector.<Edge>>();
+	public function GraphicsMatrix(numVertex:int)
+	{
+		for(var i:int = 0; i < numVertex; i++)
+		{
+			vertex[i] = new Node();
+			edges[i] = new Vector.<Edge>();
+			for(var j:int = 0; j < numVertex; j++)
+			{
+				edges[i][j] = new Edge();
+			}
+		}
+	}
+}
+
+class Node
+{
+	public var data:int;
+	public function Node()
+	{
+		
+	}
+}
+
+class Edge
+{
+	public var weight:int;
+	public function Edge()
+	{
+		
+	}
+}
+//---------------------------------------------------------------------------
+
+//-----------邻接表表示法--------------------------------------------------------
+
+//---------------------------------------------------------------------------
