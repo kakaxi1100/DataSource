@@ -26,7 +26,13 @@ package
 	 * 广度优先搜索（breadth-first search, BFS）采用的策略，可概括为： 
 		越早被访问到的顶点，其邻居越优先被选用 
 		若将上述BFS策略应用于树结构，则效果等同于层次遍历
-	 * 
+	
+	 * 深度优先搜索（Depth-First Search, DFS）选取下一顶点的策略，可概括为： 
+		优先选取最后一个被访问到的顶点的邻居  
+	 	以顶点s为基点的DFS搜索，将首先访问顶点s；再从s所有尚未访问到的邻居中任取
+		其一，并以之为基点，递归地执行DFS搜索。故各顶点被访问到的次序，类似于树的先序遍历
+		而各顶点被访问完毕的次序，则类似于树的后序遍历
+		就是一条路走到黑,如果不行就回退到最近的点,在把这个点的路走到黑,直至所有的点都走完
 	 * 	 
 	 * 
 	 * 图的邻接矩阵表示方式
@@ -56,10 +62,12 @@ package
 		//
 		
 		public var gm:GraphicsMatrix = new GraphicsMatrix(4);
+		public var gl:GraphicsAdjoinList = new GraphicsAdjoinList(4);
 		public function GraphicsTest()
 		{
 			super();
-			for(var i:int = 0; i < 4; i++)
+			var i:int;
+			for(i = 0; i < 4; i++)
 			{
 				gm.vertex[i].data = i * 10;
 				for(var j:int = i + 1; j < 4; j++){
@@ -67,6 +75,58 @@ package
 					e.weight = 1;
 				}
 			}
+			
+			for(i = 0; i < 4; i++)
+			{
+				gl.vertex[i].data = i * 10;
+			}
+			
+			var temp:EdgeNode;
+			gl.vertex[0].edge = new EdgeNode();
+			gl.vertex[0].edge.data = gl.vertex[1];
+			temp = new EdgeNode();
+			temp.data = gl.vertex[2];
+			temp.next = gl.vertex[0].edge;
+			gl.vertex[0].edge = temp;
+			temp = new EdgeNode();
+			temp.data = gl.vertex[3];
+			temp.next = gl.vertex[0].edge;
+			gl.vertex[0].edge = temp;
+			
+			gl.vertex[1].edge = new EdgeNode();
+			gl.vertex[1].edge.data = gl.vertex[0];
+			temp = new EdgeNode();
+			temp.data = gl.vertex[2];
+			temp.next = gl.vertex[1].edge;
+			gl.vertex[1].edge = temp;
+			temp = new EdgeNode();
+			temp.data = gl.vertex[3];
+			temp.next = gl.vertex[1].edge;
+			gl.vertex[1].edge = temp;
+			
+			gl.vertex[2].edge = new EdgeNode();
+			gl.vertex[2].edge.data = gl.vertex[0];
+			temp = new EdgeNode();
+			temp.data = gl.vertex[1];
+			temp.next = gl.vertex[2].edge;
+			gl.vertex[2].edge = temp;
+			temp = new EdgeNode();
+			temp.data = gl.vertex[3];
+			temp.next = gl.vertex[2].edge;
+			gl.vertex[2].edge = temp;
+			
+			gl.vertex[3].edge = new EdgeNode();
+			gl.vertex[3].edge.data = gl.vertex[0];
+			temp = new EdgeNode();
+			temp.data = gl.vertex[2];
+			temp.next = gl.vertex[3].edge;
+			gl.vertex[3].edge = temp;
+			temp = new EdgeNode();
+			temp.data = gl.vertex[1];
+			temp.next = gl.vertex[3].edge;
+			gl.vertex[3].edge = temp;
+			
+			gl.BFS_ALL();
 		}
 	}
 }
@@ -110,5 +170,104 @@ class Edge
 //---------------------------------------------------------------------------
 
 //-----------邻接表表示法--------------------------------------------------------
+class GraphicsAdjoinList
+{
+	//顶点列表, 顶点列表可以用数组也可以用链表, 当然用数组更容易
+	public var vertex:Vector.<VertexNode> = new Vector.<VertexNode>();
+	public function GraphicsAdjoinList(numVertex:int)
+	{
+		for(var i:int = 0; i < numVertex; i++)
+		{
+			vertex[i] = new VertexNode();
+		}
+	}
+	
+	//检查所有联通域
+	//因为可能存在多个连通域
+	public function BFS_ALL():void
+	{
+		var checkedList:Vector.<VertexNode> = new Vector.<VertexNode>();
+		for(var i:int = 0; i < vertex.length; i++)
+		{
+			bfs( vertex[i],checkedList);
+		}
+	}
+	
+	//和树的层次遍历一样的
+	//检查单独的连通域
+	public function bfs(firstNode:VertexNode, list:Vector.<VertexNode>):void
+	{
+		//已经检查过的列表
+		var checkedList:Vector.<VertexNode> = list;
+		//引入队列
+		var queue:Vector.<VertexNode> = new Vector.<VertexNode>();
+		//将首点加入
+		queue.push(firstNode);
+		while(queue.length > 0)
+		{
+			//第一个点出队列
+			var node:VertexNode = queue.shift();
+			if(checkedList.indexOf(node) == -1)
+			{
+				checkedList.push(node);
+				trace(node);
+			}
+			var temp:EdgeNode = node.edge;
+			while(temp != null)
+			{
+				if(queue.indexOf(temp.data) == -1 && checkedList.indexOf(temp.data) == -1)
+				{
+					queue.push(temp.data);
+				}
+				temp = temp.next;
+			}
+		}
+		
+	}
+	
+	//
+	public function DFS_ALL():void
+	{
+		
+	}
+	
+	public function dfs():void
+	{
+		//检查列表
+		var checkList:Vector.<VertexNode> = new Vector.<VertexNode>();
+		//访问列表
+		var visitList:Vector.<VertexNode> = new Vector.<VertexNode>();
+		//先指定第一个点
+		visitList.push(vertex[0]);
+	}
+}
 
+class VertexNode
+{
+	//数据域
+	public var data:int;
+	//链表域
+	public var edge:EdgeNode = null;
+	public function VertexNode()
+	{
+		
+	}
+	
+	public function toString():String
+	{
+		return data.toString();
+	}
+}
+
+
+class EdgeNode
+{
+	public var data:VertexNode;
+	public var weight:int;
+	public var next:EdgeNode;
+	public function EdgeNode()
+	{
+		
+	}
+}
 //---------------------------------------------------------------------------
