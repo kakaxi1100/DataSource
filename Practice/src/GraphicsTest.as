@@ -234,11 +234,23 @@ class GraphicsAdjoinList
 	public function dfs():void
 	{
 		//检查列表
-		var checkList:Vector.<VertexNode> = new Vector.<VertexNode>();
+		var checkedList:Vector.<VertexNode> = new Vector.<VertexNode>();
 		//访问列表
 		var visitList:Vector.<VertexNode> = new Vector.<VertexNode>();
 		//先指定第一个点
-		visitList.push(vertex[0]);
+		var temp:VertexNode = vertex[0];
+		var tempEdge:EdgeNode = vertex[0].edge;
+		visitList.push(temp);
+		//只需要一个指针不停的变化位置
+		while(tempEdge != null)
+		{
+			temp = tempEdge.data;
+			if(visitList.indexOf(temp) == -1 && checkedList.indexOf(temp) == -1)
+			{
+				visitList.push(temp);
+			}
+			tempEdge = tempEdge.next;
+		}
 	}
 }
 
