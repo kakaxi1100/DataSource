@@ -126,7 +126,8 @@ package
 			temp.next = gl.vertex[3].edge;
 			gl.vertex[3].edge = temp;
 			
-			gl.BFS_ALL();
+//			gl.BFS_ALL();
+			gl.DFS_ALL();
 		}
 	}
 }
@@ -228,30 +229,103 @@ class GraphicsAdjoinList
 	//
 	public function DFS_ALL():void
 	{
-		
-	}
-	
-	public function dfs():void
-	{
-		//检查列表
 		var checkedList:Vector.<VertexNode> = new Vector.<VertexNode>();
-		//访问列表
 		var visitList:Vector.<VertexNode> = new Vector.<VertexNode>();
-		//先指定第一个点
-		var temp:VertexNode = vertex[0];
-		var tempEdge:EdgeNode = vertex[0].edge;
-		visitList.push(temp);
-		//只需要一个指针不停的变化位置
-		while(tempEdge != null)
+		for(var i:int = 0; i < vertex.length; i++)
 		{
-			temp = tempEdge.data;
-			if(visitList.indexOf(temp) == -1 && checkedList.indexOf(temp) == -1)
+			//先指定第一个点
+			var temp:VertexNode = vertex[i];
+			if(checkedList.indexOf(temp) == -1 &&  visitList.indexOf(temp) == -1)
 			{
 				visitList.push(temp);
+				trace(temp);
+				dfs( temp, checkedList, visitList);
 			}
-			tempEdge = tempEdge.next;
 		}
 	}
+
+	public function dfs(n:VertexNode, cl:Vector.<VertexNode>, vl:Vector.<VertexNode>):void
+	{
+		//检查列表
+		var checkedList:Vector.<VertexNode> = cl;
+		//访问列表
+		var visitList:Vector.<VertexNode> = vl;
+		var temp:VertexNode = n;
+		var tempEdge:EdgeNode = temp.edge;
+		while(temp != null)
+		{
+			while(tempEdge != null)
+			{
+				//它已经被查过了那么就在检查他的邻边,否则他就作为下一个点
+				if(checkedList.indexOf(tempEdge.data) != -1 ||  visitList.indexOf(tempEdge.data) != -1)
+				{
+					tempEdge = temp.edge.next;
+				}else{
+					visitList.push(tempEdge.data);
+					temp = tempEdge.data;//当前访问的点就变成了这个
+					trace(temp);
+					tempEdge = temp.edge;//边表也变成了这个点所对应的边
+					break;
+				}
+			}
+			//如果找完了都没有找到合适的邻边,那么这个点就被访问完了
+			if(tempEdge == null)
+			{
+				//把最后的找个点弹出来,因为这个点没有边表可以访问了,并且它已经被访问过了
+				checkedList.push(visitList.pop());
+				if(visitList.length > 0){
+					temp = visitList[visitList.length - 1];//指向最后一个
+					tempEdge = temp.edge;//边表也变成了这个点所对应的边
+				}else{
+					temp = null;
+				}
+			}
+		}
+	}
+	
+//可以单独运行版
+//	public function dfs():void
+//	{
+//		//检查列表
+//		var checkedList:Vector.<VertexNode> = new Vector.<VertexNode>();
+//		//访问列表
+//		var visitList:Vector.<VertexNode> = new Vector.<VertexNode>();
+//		//先指定第一个点
+//		var temp:VertexNode = vertex[0];
+//		var tempEdge:EdgeNode = vertex[0].edge;
+//		visitList.push(temp);
+//		trace(temp);
+//		while(temp != null)
+//		{
+//			while(tempEdge != null)
+//			{
+//				//它已经被查过了那么就在检查他的邻边,否则他就作为下一个点
+//				if(checkedList.indexOf(tempEdge.data) != -1 ||  visitList.indexOf(tempEdge.data) != -1)
+//				{
+//					tempEdge = temp.edge.next;
+//				}else{
+//					visitList.push(tempEdge.data);
+//					temp = tempEdge.data;//当前访问的点就变成了这个
+//					trace(temp);
+//					tempEdge = temp.edge;//边表也变成了这个点所对应的边
+//					break;
+//				}
+//			}
+//			//如果找完了都没有找到合适的邻边,那么这个点就被访问完了
+//			if(tempEdge == null)
+//			{
+//				//把最后的找个点弹出来,因为这个点没有边表可以访问了,并且它已经被访问过了
+//				checkedList.push(visitList.pop());
+//				if(visitList.length > 0){
+//					temp = visitList[visitList.length - 1];//指向最后一个
+//					tempEdge = temp.edge;//边表也变成了这个点所对应的边
+//				}else{
+//					temp = null;
+//				}
+//			}
+//		}
+//	}
+
 }
 
 class VertexNode
