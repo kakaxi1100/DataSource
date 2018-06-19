@@ -44,6 +44,12 @@ package
 	 * 
 	 * 
 	 * 
+	 * 最短路径
+	 * Dijkstra算法
+	 * https://blog.csdn.net/heroacool/article/details/51014824
+	 * 以无向图ABCDEFG来表示 求出D到所有顶点的最短路径
+	 * 
+	 * 
 	 * @author juli
 	 * 
 	 */	
@@ -61,73 +67,178 @@ package
 		// v2    v3
 		//
 		
-		public var gm:GraphicsMatrix = new GraphicsMatrix(4);
+		public var gm:GraphicsMatrix = new GraphicsMatrix(7);
 		public var gl:GraphicsAdjoinList = new GraphicsAdjoinList(4);
 		public function GraphicsTest()
 		{
-			super();
+			super();			
 			var i:int;
-			for(i = 0; i < 4; i++)
+//------------------------邻接矩阵---------------------------------------------			
+//			for(i = 0; i < 7; i++)
+//			{
+//				gm.vertex[i].data = i * 10;
+//				for(var j:int = i + 1; j < 4; j++){
+//					var e:Edge = gm.edges[i][j] = gm.edges[j][i];//无向图矩阵对称
+//					e.weight = 1;
+//				}
+//			}
+			
+			var vertexts:Array = ["A", "B", "C", "D", "E", "F", "G"];
+			for(i = 0; i < 7; i++)
 			{
-				gm.vertex[i].data = i * 10;
-				for(var j:int = i + 1; j < 4; j++){
-					var e:Edge = gm.edges[i][j] = gm.edges[j][i];//无向图矩阵对称
-					e.weight = 1;
+				gm.vertex[i].data = vertexts[i];
+				gm.vertex[i].index = i;
+			}
+			
+			gm.edges[0][1].weight = gm.edges[1][0].weight = 12;
+			gm.edges[0][5].weight = gm.edges[5][0].weight = 16;
+			gm.edges[0][6].weight = gm.edges[6][0].weight = 14;
+			
+			gm.edges[1][2].weight = gm.edges[2][1].weight = 10;
+			gm.edges[1][5].weight = gm.edges[5][1].weight = 7;
+			
+			gm.edges[2][3].weight = gm.edges[3][2].weight = 3;
+			gm.edges[2][4].weight = gm.edges[4][2].weight = 5;
+			gm.edges[2][5].weight = gm.edges[5][2].weight = 6;
+			
+			gm.edges[3][4].weight = gm.edges[4][3].weight = 4;
+			
+			gm.edges[4][5].weight = gm.edges[5][4].weight = 2;
+			gm.edges[4][6].weight = gm.edges[6][4].weight = 8;
+			
+			gm.edges[5][6].weight = gm.edges[6][5].weight = 9;
+			
+			dijkstra(gm.vertex[1]);
+			//Dijkstra
+			function dijkstra(s:Node):void
+			{
+				var i:int;
+				var value:int;
+				var open:Array = [];
+				var close:Array = [];
+				var minValue:int = 9999;
+				var minIndex:int;
+				//先构建好初始值
+				var temStruct:Object = {"node":s, "value":0};
+				close.push(temStruct);
+				for(i = 0; i < gm.vertex.length; i++)
+				{
+					if(gm.vertex[i] != s)
+					{
+						value = gm.edges[s.index][gm.vertex[i].index].weight;
+						if(value == 0)
+						{
+							value = 9999;
+						}
+						temStruct = {"node":gm.vertex[i], "value":value};
+						open.push(temStruct);
+						if(value <　minValue)
+						{
+							minValue = value;
+							minIndex = open.length - 1;
+						}
+					}
+				}
+				
+				//接着不断的去检查open列表
+				while(open.length > 0)
+				{
+					//把最小的点从open列表中取出来
+					var temp:Object = open.splice(minIndex, 1)[0];
+					minValue = 9999;//重置minValue
+					minIndex = 0;
+					//将它添加到close列表当中
+					close.push(temp);
+					//将temp点设置为当前点, 根据temp的value重新估算open列表中的最小值
+					//如果得到的最小值比之前计算的要小,就更新此值,如果大就保留原值
+					for(i = 0; i < open.length; i++)
+					{
+						var test:int = open[i].value;
+						if(test < minValue)
+						{
+							minValue = test;
+							minIndex = i;
+						}
+						//假如当前点的值加上,当前点到此点的权值 < 此点的值
+						//那么就更新此点的值
+					    value = gm.edges[temp.node.index][open[i].node.index].weight;
+						var newValue:int = 9999;
+						if(value > 0)
+						{
+							newValue = temp.value + value;
+						}
+						if(newValue < test)
+						{
+							open[i].value = newValue;
+							if(newValue <　minValue)
+							{
+								minValue = newValue;
+								minIndex = i;
+							}
+						}
+					}
+					//重复这个while直到open列表清空
+				}
+				
+				trace(s.data);
+				for(i = 0; i < close.length; i++)
+				{
+					trace(close[i].node.data, close[i].value);
 				}
 			}
-			
-			for(i = 0; i < 4; i++)
-			{
-				gl.vertex[i].data = i * 10;
-			}
-			
-			var temp:EdgeNode;
-			gl.vertex[0].edge = new EdgeNode();
-			gl.vertex[0].edge.data = gl.vertex[1];
-			temp = new EdgeNode();
-			temp.data = gl.vertex[2];
-			temp.next = gl.vertex[0].edge;
-			gl.vertex[0].edge = temp;
-			temp = new EdgeNode();
-			temp.data = gl.vertex[3];
-			temp.next = gl.vertex[0].edge;
-			gl.vertex[0].edge = temp;
-			
-			gl.vertex[1].edge = new EdgeNode();
-			gl.vertex[1].edge.data = gl.vertex[0];
-			temp = new EdgeNode();
-			temp.data = gl.vertex[2];
-			temp.next = gl.vertex[1].edge;
-			gl.vertex[1].edge = temp;
-			temp = new EdgeNode();
-			temp.data = gl.vertex[3];
-			temp.next = gl.vertex[1].edge;
-			gl.vertex[1].edge = temp;
-			
-			gl.vertex[2].edge = new EdgeNode();
-			gl.vertex[2].edge.data = gl.vertex[0];
-			temp = new EdgeNode();
-			temp.data = gl.vertex[1];
-			temp.next = gl.vertex[2].edge;
-			gl.vertex[2].edge = temp;
-			temp = new EdgeNode();
-			temp.data = gl.vertex[3];
-			temp.next = gl.vertex[2].edge;
-			gl.vertex[2].edge = temp;
-			
-			gl.vertex[3].edge = new EdgeNode();
-			gl.vertex[3].edge.data = gl.vertex[0];
-			temp = new EdgeNode();
-			temp.data = gl.vertex[2];
-			temp.next = gl.vertex[3].edge;
-			gl.vertex[3].edge = temp;
-			temp = new EdgeNode();
-			temp.data = gl.vertex[1];
-			temp.next = gl.vertex[3].edge;
-			gl.vertex[3].edge = temp;
-			
-//			gl.BFS_ALL();
-			gl.DFS_ALL();
+//------------------------邻接表----------------------------------------------			
+//			for(i = 0; i < 4; i++)
+//			{
+//				gl.vertex[i].data = i * 10;
+//			}
+//			
+//			var temp:EdgeNode;
+//			gl.vertex[0].edge = new EdgeNode();
+//			gl.vertex[0].edge.data = gl.vertex[1];
+//			temp = new EdgeNode();
+//			temp.data = gl.vertex[2];
+//			temp.next = gl.vertex[0].edge;
+//			gl.vertex[0].edge = temp;
+//			temp = new EdgeNode();
+//			temp.data = gl.vertex[3];
+//			temp.next = gl.vertex[0].edge;
+//			gl.vertex[0].edge = temp;
+//			
+//			gl.vertex[1].edge = new EdgeNode();
+//			gl.vertex[1].edge.data = gl.vertex[0];
+//			temp = new EdgeNode();
+//			temp.data = gl.vertex[2];
+//			temp.next = gl.vertex[1].edge;
+//			gl.vertex[1].edge = temp;
+//			temp = new EdgeNode();
+//			temp.data = gl.vertex[3];
+//			temp.next = gl.vertex[1].edge;
+//			gl.vertex[1].edge = temp;
+//			
+//			gl.vertex[2].edge = new EdgeNode();
+//			gl.vertex[2].edge.data = gl.vertex[0];
+//			temp = new EdgeNode();
+//			temp.data = gl.vertex[1];
+//			temp.next = gl.vertex[2].edge;
+//			gl.vertex[2].edge = temp;
+//			temp = new EdgeNode();
+//			temp.data = gl.vertex[3];
+//			temp.next = gl.vertex[2].edge;
+//			gl.vertex[2].edge = temp;
+//			
+//			gl.vertex[3].edge = new EdgeNode();
+//			gl.vertex[3].edge.data = gl.vertex[0];
+//			temp = new EdgeNode();
+//			temp.data = gl.vertex[2];
+//			temp.next = gl.vertex[3].edge;
+//			gl.vertex[3].edge = temp;
+//			temp = new EdgeNode();
+//			temp.data = gl.vertex[1];
+//			temp.next = gl.vertex[3].edge;
+//			gl.vertex[3].edge = temp;
+//			
+////			gl.BFS_ALL();
+//			gl.DFS_ALL();
 		}
 	}
 }
@@ -153,7 +264,9 @@ class GraphicsMatrix
 
 class Node
 {
-	public var data:int;
+//	public var data:int;
+	public var data:String;
+	public var index:int = -1;
 	public function Node()
 	{
 		
