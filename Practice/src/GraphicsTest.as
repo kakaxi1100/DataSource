@@ -48,6 +48,39 @@ package
 	 * Dijkstra算法
 	 * https://blog.csdn.net/heroacool/article/details/51014824
 	 * 以无向图ABCDEFG来表示 求出D到所有顶点的最短路径
+	 * 分文两个列表 带检查的列表open和检查过的列表close
+	 * close里面存的是已经检查过的点
+	 * open里面存放的是要检查的点
+	 * 
+	 * 一个开始
+	 * close里面存放的是 起始点 s
+	 * open存放的是除起始点以外其他所有点, 并且估值是s到这个点的值
+	 * 然后去除open的最小估值点,放入close当中,并且从这个点开始再重新计算各个点的估值
+	 * 并将更小的估值更新到点中
+	 * 
+	 * 
+	 * floyd算法
+	 * https://blog.csdn.net/jeffleo/article/details/53349825
+	 * 这个算法非常精妙:
+	 * 要好好理解
+	 * 比如
+	 *          1
+	 *  	①-------②
+	 * 		|		|\1⑤
+	 * 	   6|	   3|/1
+	 * 		③-------④
+	 * 			1
+	 * 
+	 * 那么求①到③的最短路径
+	 * 应该是 ①->②->⑤->④->③
+	 * 
+	 * floyd 说你要从一个点到另一个点, 有两种情况, 要么直连,要么需要经过一个点, 比如 ②要到③ 需要经过④点
+	 * 你会说也可以是 ⑤④点呀, 但是⑤④点可以分解为 ②⑤和⑤④③ 两个部分 所以本质上还是一个直连, 一个只要经过一个点的情况
+	 * 我们先考虑 ②到④的情况
+	 * ②④本身值直连是 3 但是当他经过⑤时变为2 所以②④⑤是更短的路径
+	 * 此时更新②④的值为2, 之后无论什么路径只要走②④都会经过⑤点, 这就需要记录一下, ②④的中间点为⑤
+	 * 所以floyd 会首先更新所有点的最短路径, 然后记录其中间点
+	 * 
 	 * 
 	 * 
 	 * @author juli
@@ -72,7 +105,7 @@ package
 		public function GraphicsTest()
 		{
 			super();			
-			var i:int;
+			var i:int, j:int, k:int;
 //------------------------邻接矩阵---------------------------------------------			
 //			for(i = 0; i < 7; i++)
 //			{
@@ -108,84 +141,133 @@ package
 			
 			gm.edges[5][6].weight = gm.edges[6][5].weight = 9;
 			
-			dijkstra(gm.vertex[1]);
-			//Dijkstra
-			function dijkstra(s:Node):void
+			//floyd-warshall
+			var dist:Array = [];
+			var path:Array = [];
+			for(i = 0; i < gm.edges.length; i++)
 			{
-				var i:int;
-				var value:int;
-				var open:Array = [];
-				var close:Array = [];
-				var minValue:int = 9999;
-				var minIndex:int;
-				//先构建好初始值
-				var temStruct:Object = {"node":s, "value":0};
-				close.push(temStruct);
-				for(i = 0; i < gm.vertex.length; i++)
+				dist[i] = [];
+				path[i] = [];
+				for(j = 0; j < gm.edges.length; j++)
 				{
-					if(gm.vertex[i] != s)
+					var value:int = gm.edges[i][j].weight;
+					if(value == 0)
 					{
-						value = gm.edges[s.index][gm.vertex[i].index].weight;
-						if(value == 0)
-						{
-							value = 9999;
-						}
-						temStruct = {"node":gm.vertex[i], "value":value};
-						open.push(temStruct);
-						if(value <　minValue)
-						{
-							minValue = value;
-							minIndex = open.length - 1;
-						}
+						value = 99999;
 					}
+					dist[i][j] = value;
+					path[i][j] = j;//因为path[0][3] = 3 代表 0-3只经过3点 3是顶点的索引
 				}
-				
-				//接着不断的去检查open列表
-				while(open.length > 0)
-				{
-					//把最小的点从open列表中取出来
-					var temp:Object = open.splice(minIndex, 1)[0];
-					minValue = 9999;//重置minValue
-					minIndex = 0;
-					//将它添加到close列表当中
-					close.push(temp);
-					//将temp点设置为当前点, 根据temp的value重新估算open列表中的最小值
-					//如果得到的最小值比之前计算的要小,就更新此值,如果大就保留原值
-					for(i = 0; i < open.length; i++)
+			}
+			
+			floyd(3,0);
+			function floyd(start:int, end:int):void
+			{
+				//先构建好整个最短路径
+				for(k = 0; k < dist.length; k++){
+					for(i = 0; i < dist.length; i++)
 					{
-						var test:int = open[i].value;
-						if(test < minValue)
+						for(j = 0; j < dist.length; j++)
 						{
-							minValue = test;
-							minIndex = i;
-						}
-						//假如当前点的值加上,当前点到此点的权值 < 此点的值
-						//那么就更新此点的值
-					    value = gm.edges[temp.node.index][open[i].node.index].weight;
-						var newValue:int = 9999;
-						if(value > 0)
-						{
-							newValue = temp.value + value;
-						}
-						if(newValue < test)
-						{
-							open[i].value = newValue;
-							if(newValue <　minValue)
+							if(dist[i][j] > (dist[i][k] + dist[k][j]))
 							{
-								minValue = newValue;
-								minIndex = i;
+								dist[i][j] = dist[i][k] + dist[k][j];
+								path[i][j] = path[i][k];
 							}
 						}
 					}
-					//重复这个while直到open列表清空
 				}
-				
-				trace(s.data);
-				for(i = 0; i < close.length; i++)
+				trace(gm.vertex[start].data,"~",  gm.vertex[end].data, " : ",dist[start][end]);
+				k = path[start][end];
+				var s:String = gm.vertex[start].data;
+				while(k != end)
 				{
-					trace(close[i].node.data, close[i].value);
+					s += "->" + gm.vertex[k].data;
+					k = path[k][end];
 				}
+				s += "->" + gm.vertex[k].data;
+				trace(s);
 			}
+			
+			
+			//Dijkstra
+//			dijkstra(gm.vertex[1]);
+//			function dijkstra(s:Node):void
+//			{
+//				var i:int;
+//				var value:int;
+//				var open:Array = [];
+//				var close:Array = [];
+//				var minValue:int = 9999;
+//				var minIndex:int;
+//				//先构建好初始值
+//				var temStruct:Object = {"node":s, "value":0};
+//				close.push(temStruct);
+//				for(i = 0; i < gm.vertex.length; i++)
+//				{
+//					if(gm.vertex[i] != s)
+//					{
+//						value = gm.edges[s.index][gm.vertex[i].index].weight;
+//						if(value == 0)
+//						{
+//							value = 9999;
+//						}
+//						temStruct = {"node":gm.vertex[i], "value":value};
+//						open.push(temStruct);
+//						if(value <　minValue)
+//						{
+//							minValue = value;
+//							minIndex = open.length - 1;
+//						}
+//					}
+//				}
+//				
+//				//接着不断的去检查open列表
+//				while(open.length > 0)
+//				{
+//					//把最小的点从open列表中取出来
+//					var temp:Object = open.splice(minIndex, 1)[0];
+//					minValue = 9999;//重置minValue
+//					minIndex = 0;
+//					//将它添加到close列表当中
+//					close.push(temp);
+//					//将temp点设置为当前点, 根据temp的value重新估算open列表中的最小值
+//					//如果得到的最小值比之前计算的要小,就更新此值,如果大就保留原值
+//					for(i = 0; i < open.length; i++)
+//					{
+//						var test:int = open[i].value;
+//						if(test < minValue)
+//						{
+//							minValue = test;
+//							minIndex = i;
+//						}
+//						//假如当前点的值加上,当前点到此点的权值 < 此点的值
+//						//那么就更新此点的值
+//					    value = gm.edges[temp.node.index][open[i].node.index].weight;
+//						var newValue:int = 9999;
+//						if(value > 0)
+//						{
+//							newValue = temp.value + value;
+//						}
+//						if(newValue < test)
+//						{
+//							open[i].value = newValue;
+//							if(newValue <　minValue)
+//							{
+//								minValue = newValue;
+//								minIndex = i;
+//							}
+//						}
+//					}
+//					//重复这个while直到open列表清空
+//				}
+//				
+//				trace(s.data);
+//				for(i = 0; i < close.length; i++)
+//				{
+//					trace(close[i].node.data, close[i].value);
+//				}
+//			}
 //------------------------邻接表----------------------------------------------			
 //			for(i = 0; i < 4; i++)
 //			{
