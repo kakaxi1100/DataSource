@@ -3,6 +3,7 @@ package
 	import flash.display.Sprite;
 	/**
 	 *二分查找法 
+	 * 
 	 * @author juli
 	 * 
 	 */	
