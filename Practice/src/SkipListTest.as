@@ -5,11 +5,20 @@ package
 	public class SkipListTest extends Sprite
 	{
 		private var mMaxLayer:uint = 4;
-		private var mRoot:Vector.<Node> = new Vector.<Node>(4);
+		private var mSkipRoot:Vector.<SkipNode> = new Vector.<SkipNode>(4);
+		private var nodeHead:Node = new Node();
 		public function SkipListTest()
 		{
 			super();
-			init();
+			init();			
+			
+			var a:Array = [10,30,20,50,40];
+			for(var i:int = 0; i < a.length; i++)
+			{
+				this.insert(a[i]);
+			}
+			print();
+			
 		}
 		
 		private function init():void
@@ -17,65 +26,156 @@ package
 			//初始化头结点
 			for(var i:int = 0; i < mMaxLayer; i++)
 			{
-				mRoot[i] = new Node();
+				mSkipRoot[i] = new SkipNode();
+				mSkipRoot[i].data = nodeHead;
+				if(i > 0)
+				{
+					mSkipRoot[i].down = mSkipRoot[i - 1];
+				}
 			}
 		}
 		
-		public function search(value:int):void
+		public function search(value:int):SkipNode
 		{
-			
+			var prev:Vector.<SkipNode> = new Vector.<SkipNode>(4);//上一个节点
+			var cur:Vector.<SkipNode> = new Vector.<SkipNode>(4);//当前查找的节点
+			var i:int;
+			for(i = 0; i < mMaxLayer; i++)
+			{
+				prev[i] = mSkipRoot[i];
+				cur[i] = prev[i].next;
+			}
+			i = mMaxLayer - 1;
+			do
+			{
+				
+				if(cur[i] == null)
+				{
+					i--;
+				}else
+				{
+					if(cur[i].data.data > value)//在下层查找
+					{
+						i--;
+						if(i >=0 )
+						{
+							prev[i] =prev[i + 1].down;
+							cur[i] = prev[i].next;
+						}
+					}else if(cur[i].data.data < value)//继续在本层查找
+					{
+						prev[i] = cur[i];
+						cur[i] = prev[i].next;
+						
+					}else//不保存相同值
+					{
+						return cur[i];
+					}
+				}
+				
+			}while( i >= 0);
+				
+			return null;
 		}
 		
 		public function insert(value:int):void
 		{
-			var prev:Vector.<Node> = new Vector.<Node>(4);//上一个节点
-			var cur:Vector.<Node> = new Vector.<Node>(4);//当前查找的节点
+			var prev:Vector.<SkipNode> = new Vector.<SkipNode>(4);//上一个节点
+			var cur:Vector.<SkipNode> = new Vector.<SkipNode>(4);//当前查找的节点
 			var newNode:Node;
-			//1.先从最上层开始找起
-			for(var i:int = mMaxLayer - 1; i >= 0; --i)
+			var newSkipNode:SkipNode;
+			var i:int;
+			for(i = 0; i < mMaxLayer; i++)
 			{
-				prev[i] = mRoot[i];
-				cur[i] = mRoot[i].next;
-				if(cur[i] == null)//假如这一层的第一个节点就是空那么就直接从下一层开始找起
+				prev[i] = mSkipRoot[i];
+				cur[i] = prev[i].next;
+			}
+			i = mMaxLayer - 1;
+			do
+			{
+
+				if(cur[i] == null)
 				{
-					continue;
+					i--;
 				}else
 				{
-					if(cur[i] > value)
+					if(cur[i].data.data > value)//在下层查找
 					{
-						
-					}else if(cur[i] < value)//如果当前的节点必要查找的小,那么就要继续查找下一个区间
+						i--;
+						if(i >=0 )
+						{
+							prev[i] =prev[i + 1].down;
+							cur[i] = prev[i].next;
+						}
+					}else if(cur[i].data.data < value)//继续在本层查找
 					{
 						prev[i] = cur[i];
-						cur[i] = cur[i].next;
-					}else//如果元素相同则不要插入
+						cur[i] = prev[i].next;
+						
+					}else//不保存相同值
 					{
 						return;
 					}
 				}
-			}
+				
+			}while( i >= 0)
 			
 			newNode = new Node();
 			newNode.data = value;
+			
 			//看要插入几层
 			var layer:uint = randomLayer();
 			//对每一层进行插入
 			for(var j:int = 0; j <= layer; j++)
 			{
-				newNode.next = prev[j].next;
-				prev[j].next = newNode;
+				newSkipNode = new SkipNode();
+				newSkipNode.data = newNode;
+				newSkipNode.next = prev[j].next;
+ 				prev[j].next = newSkipNode;
+				if(j > 0)
+				{
+					newSkipNode.down = prev[j - 1].next;
+				}
 			}
 		}
 		
-		public function remove():void
+		public function remove(value:int):void
 		{
-			
+			//remove 其实很简单了 因为 search 可以做到同时返回值与值的前驱
 		}
 		
 		private function randomLayer():uint
 		{
 			return Math.floor(Math.random() * 4);
 		}
+		
+		public function print():void
+		{
+			for(var i:int = mSkipRoot.length - 1; i >= 0 ; --i)
+			{
+				var s:String = "";
+				s += "第" + i + "行: ";
+				var cur:SkipNode = mSkipRoot[i];
+				while(cur != null)
+				{
+					s += cur.toString() + ", ";
+					cur = cur.next;
+				}
+				trace(s);
+			}
+		}
+	}
+}
+
+class SkipNode
+{
+	public var data:Node;//引用的那个Node
+	public var next:SkipNode;//下一个Node
+	public var down:SkipNode;//下一级指向的Node
+	
+	public function toString():String
+	{
+		return data.toString();
 	}
 }
 
@@ -86,5 +186,10 @@ class Node
 	public function Node()
 	{
 		
+	}
+	
+	public function toString():String
+	{
+		return data.toString();
 	}
 }
