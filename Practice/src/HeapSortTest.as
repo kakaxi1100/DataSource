@@ -32,11 +32,60 @@ package
 			insert(15, arr);
 			insert(38, arr);
 			insert(26, arr);
+//			sort(arr);
 			trace(arr);
 			remove(20, arr);
 			remove(8, arr);
 			remove(38, arr);
 			trace(arr);
+			sort(arr);
+			trace(arr);
+		}
+		
+		//排序，排序就是不断删除堆顶然后堆化的过程
+		public function sort(heap:Array):void
+		{
+			var curtIndex:int;
+			var length:int = heap.length;
+			while(length > 0)
+			{
+				//第一个与最后一个进行交换
+				var temp:int = heap[length - 1];
+				heap[length - 1] = heap[0];
+				heap[0] = temp;
+				length--;
+				curtIndex = 0;
+				//然后对第一个进行堆化
+				while(curtIndex >= 0)
+				{
+					var leftIndex:int = 2*curtIndex + 1;
+					var rightIndex:int = 2*curtIndex + 2;
+					var tempIndex:int = -1;
+					//如果左边超出了范围, 那么右边肯定超出了范围, 所以只要检测左边范围就就可以了
+					if(leftIndex < length)
+					{
+						if(rightIndex >= length || heap[leftIndex] > heap[rightIndex])//假如左边比右边大, 就跟左边交换
+						{
+							tempIndex = leftIndex;
+						}else//否则就跟右边交换
+						{
+							tempIndex = rightIndex;		
+						}
+					}
+					
+					if(tempIndex != -1)
+					{
+						if(heap[curtIndex] < heap[tempIndex])
+						{
+							temp = heap[curtIndex];
+							heap[curtIndex] = heap[tempIndex];
+							heap[tempIndex] = temp;
+						}
+					}
+					
+					curtIndex = tempIndex;
+				}
+			}
 		}
 		
 		//从下往上构建
